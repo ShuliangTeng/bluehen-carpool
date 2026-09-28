@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PostChoices } from "@/components/post-choices";
 import { RideForm } from "@/components/ride-form";
+import { pageLead, pageTitle } from "@/components/styles";
 import { createRide } from "@/app/actions/rides";
 import { oneParam, todayInNewark } from "@/lib/format";
 import type { RideKind } from "@/lib/types";
@@ -20,14 +21,14 @@ export default async function NewRidePage({
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="text-3xl font-semibold tracking-tight">
+      <h1 className={pageTitle}>
         {selected === "offer"
           ? "Offer a ride"
           : selected === "request"
             ? "Request a ride"
             : "Offer or request"}
       </h1>
-      <p className="mt-2 leading-7 text-muted">
+      <p className={pageLead}>
         {selected === "offer"
           ? "You are driving and have seats available."
           : selected === "request"
@@ -40,6 +41,7 @@ export default async function NewRidePage({
           <RideForm
             action={createRide}
             submitLabel={selected === "offer" ? "Post offer" : "Post request"}
+            showKindPicker={false}
             today={todayInNewark()}
             initial={{
               kind: selected,

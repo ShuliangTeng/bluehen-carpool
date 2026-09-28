@@ -3,13 +3,14 @@
 import { useActionState, useState } from "react";
 import { CarIcon, SeatIcon } from "@/components/icons";
 import { SubmitButton } from "@/components/submit-button";
-import { fieldClass, helperClass, labelClass } from "@/components/styles";
+import { alertError, choiceCard, choiceCardSelected, fieldClass, helperClass, hintClass, labelClass } from "@/components/styles";
 import type { ActionState, RideKind } from "@/lib/types";
 
 type RideFormProps = {
   action: (state: ActionState, formData: FormData) => Promise<ActionState>;
   submitLabel: string;
   today: string;
+  showKindPicker?: boolean;
   initial?: {
     rideId?: string;
     kind: RideKind;
@@ -40,7 +41,7 @@ const empty = {
   hasInsurance: false,
 };
 
-export function RideForm({ action, submitLabel, today, initial }: RideFormProps) {
+export function RideForm({ action, submitLabel, today, showKindPicker = true, initial }: RideFormProps) {
   const [state, formAction] = useActionState(action, { error: null });
   const [draft, setDraft] = useState({
     ...empty,
@@ -57,56 +58,63 @@ export function RideForm({ action, submitLabel, today, initial }: RideFormProps)
   }
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form action={formAction} className="space-y-6">
       {initial?.rideId ? <input type="hidden" name="rideId" value={initial.rideId} /> : null}
       <input type="hidden" name="kind" value={draft.kind} />
       {state.error ? (
-        <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p role="alert" className={alertError}>
           {state.error}
         </p>
       ) : null}
 
-      <fieldset>
-        <legend className={labelClass}>What are you posting?</legend>
-        <div className="mt-2 grid gap-3 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={() => setDraft((current) => ({ ...current, kind: "offer" }))}
-            className={`rounded-2xl border-2 p-4 text-left transition duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hen ${
-              offer ? "border-gold bg-gold/10" : "border-line bg-white hover:border-gold/70"
-            }`}
-            aria-pressed={offer}
-          >
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gold/30 text-hen-dark">
-              <CarIcon />
-            </span>
-            <span className="mt-3 block text-base font-semibold tracking-tight">Offer a ride</span>
-            <span className="mt-1 block text-sm font-normal leading-5 text-muted">
-              I&apos;m driving and have available seats.
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setDraft((current) => ({ ...current, kind: "request" }))}
-            className={`rounded-2xl border-2 p-4 text-left transition duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hen ${
-              !offer ? "border-hen bg-hen/5" : "border-line bg-white hover:border-hen/30"
-            }`}
-            aria-pressed={!offer}
-          >
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-hen/10 text-hen">
-              <SeatIcon />
-            </span>
-            <span className="mt-3 block text-base font-semibold tracking-tight">Request a ride</span>
-            <span className="mt-1 block text-sm font-normal leading-5 text-muted">
-              I need a ride to a destination.
-            </span>
-          </button>
-        </div>
-      </fieldset>
+      {showKindPicker ? (
+        <fieldset>
+          <legend className={labelClass}>What are you posting?</legend>
+          <div className="mt-2 grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => setDraft((current) => ({ ...current, kind: "offer" }))}
+              className={offer ? choiceCardSelected : choiceCard}
+              aria-pressed={offer}
+            >
+              <span
+                className={`inline-flex h-9 w-9 items-center justify-center rounded-xl ${
+                  offer ? "bg-white/15 text-white" : "bg-paper text-hen"
+                }`}
+              >
+                <CarIcon />
+              </span>
+              <span className="mt-3 block text-base font-semibold tracking-tight">Offer a ride</span>
+              <span className={`mt-1 block text-sm font-normal leading-5 ${offer ? "text-white/80" : "text-muted"}`}>
+                I&apos;m driving and have available seats.
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setDraft((current) => ({ ...current, kind: "request" }))}
+              className={!offer ? choiceCardSelected : choiceCard}
+              aria-pressed={!offer}
+            >
+              <span
+                className={`inline-flex h-9 w-9 items-center justify-center rounded-xl ${
+                  !offer ? "bg-white/15 text-white" : "bg-paper text-hen"
+                }`}
+              >
+                <SeatIcon />
+              </span>
+              <span className="mt-3 block text-base font-semibold tracking-tight">Request a ride</span>
+              <span className={`mt-1 block text-sm font-normal leading-5 ${!offer ? "text-white/80" : "text-muted"}`}>
+                I need a ride to a destination.
+              </span>
+            </button>
+          </div>
+        </fieldset>
+      ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-2">
         <label className={labelClass}>
           Starting point
+          <span className={hintClass}>Required</span>
           <span className={helperClass}>Where the trip begins.</span>
           <input
             className={fieldClass}
@@ -120,6 +128,7 @@ export function RideForm({ action, submitLabel, today, initial }: RideFormProps)
         </label>
         <label className={labelClass}>
           Destination
+          <span className={hintClass}>Required</span>
           <span className={helperClass}>Where you are headed.</span>
           <input
             className={fieldClass}
@@ -133,6 +142,7 @@ export function RideForm({ action, submitLabel, today, initial }: RideFormProps)
         </label>
         <label className={labelClass}>
           Date
+          <span className={hintClass}>Required</span>
           <span className={helperClass}>The day of the trip.</span>
           <input
             className={fieldClass}
@@ -146,6 +156,7 @@ export function RideForm({ action, submitLabel, today, initial }: RideFormProps)
         </label>
         <label className={labelClass}>
           {offer ? "Departure time" : "Preferred time"}
+          <span className={hintClass}>Required</span>
           <span className={helperClass}>
             {offer ? "When you plan to leave." : "About when you would like to leave."}
           </span>
@@ -160,6 +171,7 @@ export function RideForm({ action, submitLabel, today, initial }: RideFormProps)
         </label>
         <label className={labelClass}>
           {offer ? "Available seats" : "Number of passengers"}
+          <span className={hintClass}>Required</span>
           <span className={helperClass}>
             {offer ? "Seats you can offer, from 1 to 8." : "People who need a seat, from 1 to 8."}
           </span>
@@ -175,11 +187,12 @@ export function RideForm({ action, submitLabel, today, initial }: RideFormProps)
           />
         </label>
         <label className={labelClass}>
-          {offer ? "Price per seat" : "Budget, optional"}
+          {offer ? "Price per seat" : "Expected budget"}
+          <span className={hintClass}>{offer ? "Required" : "Optional"}</span>
           <span className={helperClass}>
             {offer
               ? "What each passenger pays, from $0 to $500."
-              : "What you are willing to contribute. Leave this blank if you do not have a number."}
+              : "What you hope to contribute. This is not a fare set by a driver. Leave it blank if you do not have a number."}
           </span>
           <input
             className={fieldClass}
@@ -198,6 +211,7 @@ export function RideForm({ action, submitLabel, today, initial }: RideFormProps)
 
       <label className={labelClass}>
         Notes
+        <span className={hintClass}>Optional</span>
         <span className={helperClass}>Pickup spot, luggage, or anything else helpful.</span>
         <textarea
           className={fieldClass}
@@ -211,7 +225,11 @@ export function RideForm({ action, submitLabel, today, initial }: RideFormProps)
       </label>
 
       {offer ? (
-        <div className="space-y-4 rounded-2xl border border-gold/50 bg-gold/10 p-4">
+        <div className="space-y-4 rounded-2xl border border-line bg-paper p-4">
+          <p className="text-sm font-semibold tracking-tight text-ink">
+            Driver details
+            <span className={hintClass}>Required</span>
+          </p>
           <label className={labelClass}>
             Vehicle
             <span className={helperClass}>A short description so riders know the car.</span>
@@ -234,7 +252,7 @@ export function RideForm({ action, submitLabel, today, initial }: RideFormProps)
                 setDraft((current) => ({ ...current, hasLicense: event.target.checked }))
               }
               required
-              className="mt-1"
+              className="mt-1 size-4 accent-hen"
             />
             I have a valid driver&apos;s license.
           </label>
@@ -247,7 +265,7 @@ export function RideForm({ action, submitLabel, today, initial }: RideFormProps)
                 setDraft((current) => ({ ...current, hasInsurance: event.target.checked }))
               }
               required
-              className="mt-1"
+              className="mt-1 size-4 accent-hen"
             />
             I have auto insurance.
           </label>

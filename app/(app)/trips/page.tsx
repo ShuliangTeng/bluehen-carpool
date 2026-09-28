@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { EmptyState } from "@/components/empty-state";
+import { CarIcon, SeatIcon } from "@/components/icons";
 import { RideCard } from "@/components/ride-card";
+import { alertError, linkCard, pageLead, pageTitle, primaryButton, secondaryButton } from "@/components/styles";
 import { requireViewer } from "@/lib/auth";
 import {
   flashMessage,
@@ -51,22 +54,30 @@ export default async function TripsPage({
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-3xl font-semibold tracking-tight">My trips</h1>
-      <p className="mt-2 text-muted">
+      <h1 className={pageTitle}>My trips</h1>
+      <p className={pageLead}>
         Rides you posted, responses you sent, and trips that are confirmed.
       </p>
       {error ? (
-        <p role="alert" className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p role="alert" className={`mt-4 ${alertError}`}>
           {error}
         </p>
       ) : null}
 
       <section className="mt-8">
-        <h2 className="text-2xl font-bold">Confirmed trips</h2>
+        <h2 className="text-xl font-semibold tracking-tight">Confirmed trips</h2>
         {confirmed.length === 0 ? (
-          <p className="mt-3 text-muted">
-            Nothing confirmed yet. When a request is accepted, it will show up here.
-          </p>
+          <EmptyState
+            icon={<CarIcon />}
+            title="No confirmed trips yet"
+            action={
+              <Link href="/board" className={primaryButton}>
+                Browse the ride board
+              </Link>
+            }
+          >
+            When a response is accepted, the trip shows up here.
+          </EmptyState>
         ) : (
           <ul className="mt-4 grid gap-4">
             {confirmed.map((response) => {
@@ -80,12 +91,9 @@ export default async function TripsPage({
                   : profileName(response.profiles);
               return (
                 <li key={response.id}>
-                  <Link
-                    href={`/rides/${ride.id}`}
-                    className="block rounded-2xl border border-line bg-white p-5 shadow-sm transition duration-150 hover:border-hen/40 hover:shadow-md"
-                  >
+                  <Link href={`/rides/${ride.id}`} className={linkCard}>
                     <p className="text-sm font-semibold text-hen">Confirmed with {otherName}</p>
-                    <p className="mt-2 text-xl font-semibold tracking-tight">
+                    <p className="mt-2 break-words text-xl font-semibold tracking-tight">
                       {ride.origin} <span className="text-hen">→</span> {ride.destination}
                     </p>
                     <p className="mt-2 text-ink">
@@ -105,24 +113,33 @@ export default async function TripsPage({
 
       <section className="mt-10">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-2xl font-semibold tracking-tight">Rides I posted</h2>
+          <h2 className="text-xl font-semibold tracking-tight">Rides I posted</h2>
           <div className="flex flex-wrap gap-2">
-            <Link
-              href="/rides/new?kind=offer"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-gold bg-gold/20 px-4 text-sm font-semibold text-hen-dark"
-            >
+            <Link href="/rides/new?kind=offer" className={secondaryButton}>
               Offer
             </Link>
-            <Link
-              href="/rides/new?kind=request"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-hen/30 bg-white px-4 text-sm font-semibold text-hen"
-            >
+            <Link href="/rides/new?kind=request" className={secondaryButton}>
               Request
             </Link>
           </div>
         </div>
         {posted.length === 0 ? (
-          <p className="mt-3 text-muted">You have not posted a ride yet.</p>
+          <EmptyState
+            icon={<SeatIcon />}
+            title="No trips posted yet"
+            action={
+              <>
+                <Link href="/rides/new?kind=offer" className={secondaryButton}>
+                  Offer a ride
+                </Link>
+                <Link href="/rides/new?kind=request" className={secondaryButton}>
+                  Request a ride
+                </Link>
+              </>
+            }
+          >
+            Offer a ride if you are driving, or request one if you need a seat.
+          </EmptyState>
         ) : (
           <div className="mt-4 grid gap-4">
             {posted.map((ride) => (
@@ -133,11 +150,11 @@ export default async function TripsPage({
       </section>
 
       <section className="mt-10">
-        <h2 className="text-2xl font-bold">Responses I sent</h2>
+        <h2 className="text-xl font-semibold tracking-tight">Responses I sent</h2>
         {sent.length === 0 ? (
-          <p className="mt-3 text-muted">
+          <EmptyState icon={<SeatIcon />} title="No responses yet">
             When you request a seat or offer to drive, it will show up here.
-          </p>
+          </EmptyState>
         ) : (
           <ul className="mt-4 grid gap-4">
             {sent.map((response) => {
@@ -147,15 +164,12 @@ export default async function TripsPage({
               }
               return (
                 <li key={response.id}>
-                  <Link
-                    href={`/rides/${ride.id}`}
-                    className="block rounded-2xl border border-line bg-white p-5 shadow-sm transition duration-150 hover:border-hen/40 hover:shadow-md"
-                  >
+                  <Link href={`/rides/${ride.id}`} className={linkCard}>
                     <p className="text-sm font-semibold text-muted">
                       {statusLabel(response.status)} · {response.seats}{" "}
                       {response.seats === 1 ? "seat" : "seats"}
                     </p>
-                    <p className="mt-2 text-xl font-semibold tracking-tight">
+                    <p className="mt-2 break-words text-xl font-semibold tracking-tight">
                       {ride.origin} <span className="text-hen">→</span> {ride.destination}
                     </p>
                     <p className="mt-2 text-ink">

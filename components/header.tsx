@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { signOut } from "@/app/actions/auth";
-import { BellIcon } from "@/components/icons";
-import { goldButton, secondaryButton } from "@/components/styles";
+import { BellIcon, CarIcon } from "@/components/icons";
+import { RideNav } from "@/components/ride-nav";
+import { navButton, primaryButton } from "@/components/styles";
 import type { Viewer } from "@/lib/auth";
 
 export function Header({
@@ -15,34 +17,44 @@ export function Header({
 
   return (
     <header className="border-b border-line bg-white">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-        <Link href="/" className="text-lg font-semibold tracking-tight text-hen">
-          BlueHen CarPool
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2.5">
+        <Link
+          href="/"
+          className="inline-flex min-h-11 items-center gap-2.5 rounded-xl text-hen focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hen"
+        >
+          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-hen text-gold">
+            <CarIcon className="h-[18px] w-[18px]" />
+          </span>
+          <span className="text-[1.05rem] font-semibold leading-none tracking-tight">
+            BlueHen <span className="font-medium text-ink">CarPool</span>
+          </span>
         </Link>
         <nav className="flex flex-wrap items-center gap-2" aria-label="Main">
           {viewer ? (
             <>
-              <Link href="/board" className={secondaryButton}>
+              <Link href="/board" className={navButton}>
                 Ride board
               </Link>
-              <Link
-                href="/rides/new?kind=offer"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-gold bg-gold/20 px-4 text-sm font-semibold tracking-tight text-hen-dark transition duration-150 hover:bg-gold/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hen"
+              <Suspense
+                fallback={
+                  <>
+                    <Link href="/rides/new?kind=offer" className={navButton}>
+                      Offer
+                    </Link>
+                    <Link href="/rides/new?kind=request" className={navButton}>
+                      Request
+                    </Link>
+                  </>
+                }
               >
-                Offer
-              </Link>
-              <Link
-                href="/rides/new?kind=request"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-hen/30 bg-white px-4 text-sm font-semibold tracking-tight text-hen transition duration-150 hover:bg-hen/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hen"
-              >
-                Request
-              </Link>
-              <Link href="/trips" className={secondaryButton}>
+                <RideNav />
+              </Suspense>
+              <Link href="/trips" className={navButton}>
                 My trips
               </Link>
               <Link
                 href="/notifications"
-                className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-line bg-white text-hen transition duration-150 hover:border-hen/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hen"
+                className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-line bg-white text-hen transition duration-150 hover:border-hen/40 hover:bg-paper active:translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hen"
                 aria-label={
                   unreadCount > 0
                     ? `${unreadCount} unread notifications`
@@ -56,26 +68,27 @@ export function Header({
                   </span>
                 ) : null}
               </Link>
-              <span className="px-1 text-sm font-medium text-muted">{viewer.fullName}</span>
+              <span className="max-w-28 truncate px-1 text-sm font-medium text-muted sm:max-w-40">
+                {viewer.fullName}
+              </span>
               <form action={signOut}>
-                <button type="submit" className={secondaryButton}>
+                <button type="submit" className={navButton}>
                   Log out
                 </button>
               </form>
             </>
           ) : (
             <>
-              <Link href="/login" className={secondaryButton}>
+              <Link href="/login" className={navButton}>
                 Log in
               </Link>
-              <Link href="/signup" className={goldButton}>
+              <Link href="/signup" className={primaryButton}>
                 Sign up
               </Link>
             </>
           )}
         </nav>
       </div>
-      <div className="h-1 bg-gold" />
     </header>
   );
 }

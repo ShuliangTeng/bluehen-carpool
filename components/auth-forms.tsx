@@ -4,25 +4,26 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { signIn, signUp } from "@/app/actions/auth";
 import { SubmitButton } from "@/components/submit-button";
-import { fieldClass, labelClass } from "@/components/styles";
+import { alertError, alertOk, fieldClass, helperClass, hintClass, labelClass } from "@/components/styles";
 
 export function LoginForm({ confirmed }: { confirmed: boolean }) {
   const [state, action] = useActionState(signIn, { error: null });
 
   return (
-    <form key={state.attempt ?? 0} action={action} className="space-y-4">
+    <form key={state.attempt ?? 0} action={action} className="space-y-5">
       {confirmed ? (
-        <p role="status" className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-900">
+        <p role="status" className={alertOk}>
           Email confirmed. Log in with your password.
         </p>
       ) : null}
       {state.error ? (
-        <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p role="alert" className={alertError}>
           {state.error}
         </p>
       ) : null}
       <label className={labelClass}>
         Email
+        <span className={hintClass}>Required</span>
         <input
           className={fieldClass}
           type="email"
@@ -34,6 +35,7 @@ export function LoginForm({ confirmed }: { confirmed: boolean }) {
       </label>
       <label className={labelClass}>
         Password
+        <span className={hintClass}>Required</span>
         <input
           className={fieldClass}
           type="password"
@@ -57,14 +59,16 @@ export function SignupForm() {
   const [state, action] = useActionState(signUp, { error: null });
 
   return (
-    <form key={state.attempt ?? 0} action={action} className="space-y-4">
+    <form key={state.attempt ?? 0} action={action} className="space-y-5">
       {state.error ? (
-        <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p role="alert" className={alertError}>
           {state.error}
         </p>
       ) : null}
       <label className={labelClass}>
         Name
+        <span className={hintClass}>Required</span>
+        <span className={helperClass}>The name other students will see.</span>
         <input
           className={fieldClass}
           name="fullName"
@@ -78,6 +82,7 @@ export function SignupForm() {
       </label>
       <label className={labelClass}>
         Email
+        <span className={hintClass}>Required</span>
         <input
           className={fieldClass}
           type="email"
@@ -89,6 +94,8 @@ export function SignupForm() {
       </label>
       <label className={labelClass}>
         Password
+        <span className={hintClass}>Required</span>
+        <span className={helperClass}>At least 8 characters.</span>
         <input
           className={fieldClass}
           type="password"
@@ -100,6 +107,7 @@ export function SignupForm() {
       </label>
       <label className={labelClass}>
         Confirm password
+        <span className={hintClass}>Required</span>
         <input
           className={fieldClass}
           type="password"

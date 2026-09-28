@@ -1,8 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { EmptyState } from "@/components/empty-state";
+import { CarIcon } from "@/components/icons";
 import { PostChoices } from "@/components/post-choices";
 import { RideCard } from "@/components/ride-card";
-import { fieldClass, primaryButton, secondaryButton } from "@/components/styles";
+import {
+  alertError,
+  fieldClass,
+  filterActive,
+  filterIdle,
+  pageLead,
+  pageTitle,
+  primaryButton,
+  secondaryButton,
+} from "@/components/styles";
 import { createClient } from "@/lib/supabase/server";
 import { flashMessage, oneParam, todayInNewark } from "@/lib/format";
 import { normalizeRide } from "@/lib/rides";
@@ -58,8 +69,8 @@ export default async function BoardPage({
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Ride board</h1>
-        <p className="mt-2 leading-7 text-muted">
+        <h1 className={pageTitle}>Ride board</h1>
+        <p className={pageLead}>
           Open rides from UD students. Offers are drivers with seats. Requests are students who need a ride.
         </p>
       </div>
@@ -68,7 +79,7 @@ export default async function BoardPage({
       </div>
 
       {error ? (
-        <p role="alert" className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p role="alert" className={`mt-4 ${alertError}`}>
           {error}
         </p>
       ) : null}
@@ -86,9 +97,7 @@ export default async function BoardPage({
             <Link
               key={label}
               href={boardHref(value, q)}
-              className={`inline-flex min-h-11 items-center rounded-xl px-4 text-sm font-semibold transition duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hen ${
-                active ? "bg-hen text-white" : "border border-line bg-white text-ink hover:border-hen/40"
-              }`}
+              className={active ? filterActive : filterIdle}
               aria-current={active ? "page" : undefined}
             >
               {label}
@@ -111,7 +120,7 @@ export default async function BoardPage({
             maxLength={80}
           />
         </label>
-        <div className="flex items-end gap-2">
+        <div className="flex flex-wrap items-end gap-2">
           <button type="submit" className={primaryButton}>
             Search
           </button>
@@ -124,26 +133,36 @@ export default async function BoardPage({
       </form>
 
       {rides.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-dashed border-line bg-white p-8 text-center shadow-sm">
-          <p className="text-lg font-semibold">
-            {q
+        <EmptyState
+          icon={<CarIcon />}
+          title={
+            q
               ? "No rides match that search."
               : kind === "offer"
                 ? "No open offers right now."
                 : kind === "request"
                   ? "No open requests right now."
-                  : "No rides yet"}
-          </p>
-          <p className="mt-2 leading-6 text-muted">
-            {q
-              ? "Try another destination, or post your own trip."
-              : kind === "offer"
-                ? "Offer a ride if you are driving and have seats."
-                : kind === "request"
-                  ? "Request a ride if you need to get somewhere."
-                  : "Offer seats if you are driving, or request a ride if you need one."}
-          </p>
-        </div>
+                  : "No rides yet"
+          }
+          action={
+            <>
+              <Link href="/rides/new?kind=offer" className={secondaryButton}>
+                Offer a ride
+              </Link>
+              <Link href="/rides/new?kind=request" className={secondaryButton}>
+                Request a ride
+              </Link>
+            </>
+          }
+        >
+          {q
+            ? "Try another destination, or post your own trip."
+            : kind === "offer"
+              ? "Offer a ride if you are driving and have seats."
+              : kind === "request"
+                ? "Request a ride if you need to get somewhere."
+                : "Offer seats if you are driving, or request a ride if you need one."}
+        </EmptyState>
       ) : (
         <div className="mt-6 grid gap-4">
           {rides.map((ride) => (

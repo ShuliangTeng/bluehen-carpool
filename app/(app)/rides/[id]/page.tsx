@@ -9,12 +9,20 @@ import {
   deleteRide,
   withdrawResponse,
 } from "@/app/actions/rides";
+import { CalendarIcon, CarIcon, ClockIcon, SeatIcon } from "@/components/icons";
+import { Initials } from "@/components/initials";
 import {
+  alertError,
+  alertOk,
+  chipClass,
   dangerButton,
   fieldClass,
+  hintClass,
+  kindPill,
   labelClass,
   primaryButton,
   secondaryButton,
+  textLink,
 } from "@/components/styles";
 import { requireViewer } from "@/lib/auth";
 import {
@@ -74,34 +82,47 @@ export default async function RideDetailsPage({
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <Link href="/board" className="text-sm font-semibold text-hen">
+      <Link href="/board" className={textLink}>
         Back to the ride board
       </Link>
-      <article className="mt-4 rounded-2xl border border-line bg-white p-6 shadow-sm">
+      <article className="mt-4 rounded-2xl border border-line bg-white p-5 shadow-sm sm:p-6">
         <div className="flex flex-wrap gap-2">
-          <span
-            className={
-              ride.kind === "offer"
-                ? "rounded-xl border border-gold bg-gold/25 px-2.5 py-1 text-xs font-semibold tracking-wide text-hen-dark"
-                : "rounded-xl border border-hen/30 bg-hen/5 px-2.5 py-1 text-xs font-semibold tracking-wide text-hen"
-            }
-          >
+          <span className={kindPill}>
+            {ride.kind === "offer" ? (
+              <CarIcon className="h-3.5 w-3.5 text-hen" />
+            ) : (
+              <SeatIcon className="h-3.5 w-3.5 text-hen" />
+            )}
             {kindLabel(ride.kind)}
           </span>
           <span className="rounded-xl bg-paper px-2.5 py-1 text-xs font-semibold text-muted">
             {statusLabel(ride.status)}
           </span>
         </div>
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight">
+        <h1 className="mt-4 break-words text-2xl font-semibold tracking-tight sm:text-3xl">
           {ride.origin} <span className="text-hen">→</span> {ride.destination}
         </h1>
-        <p className="mt-3 text-lg">
-          {formatDate(ride.trip_date)} at {formatTime(ride.departure_time)}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className={chipClass}>
+            <CalendarIcon className="h-4 w-4 shrink-0 text-hen" />
+            {formatDate(ride.trip_date)}
+          </span>
+          <span className={chipClass}>
+            <ClockIcon className="h-4 w-4 shrink-0 text-hen" />
+            {formatTime(ride.departure_time)}
+          </span>
+        </div>
+        <p className="mt-3 text-sm leading-6 text-muted">
+          {seatLabel(ride.kind, ride.seats)}
+          <span className="px-1.5 text-line" aria-hidden="true">
+            ·
+          </span>
+          <span className="font-medium text-ink">{priceLabel(ride.kind, ride.price)}</span>
         </p>
-        <p className="mt-1 text-muted">
-          {seatLabel(ride.kind, ride.seats)} · {priceLabel(ride.kind, ride.price)}
+        <p className="mt-4 flex items-center gap-2 text-sm text-muted">
+          <Initials name={profileName(ride.profiles)} />
+          Posted by <span className="font-medium text-ink">{profileName(ride.profiles)}</span>
         </p>
-        <p className="mt-4 font-semibold text-hen">Posted by {profileName(ride.profiles)}</p>
         {ride.notes ? <p className="mt-4 whitespace-pre-wrap text-ink">{ride.notes}</p> : null}
         {ride.kind === "offer" ? (
           <div className="mt-5 rounded-2xl bg-paper p-4 text-sm leading-6">
@@ -120,12 +141,12 @@ export default async function RideDetailsPage({
       </article>
 
       {notice ? (
-        <p role="status" className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-900">
+        <p role="status" className={`mt-4 ${alertOk}`}>
           {notice}
         </p>
       ) : null}
       {error ? (
-        <p role="alert" className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p role="alert" className={`mt-4 ${alertError}`}>
           {error}
         </p>
       ) : null}
@@ -164,8 +185,8 @@ export default async function RideDetailsPage({
             )}
           </div>
 
-          <div className="rounded-3xl border border-line bg-white p-5">
-            <h2 className="text-xl font-bold">
+          <div className="rounded-2xl border border-line bg-white p-5 shadow-sm">
+            <h2 className="text-xl font-semibold tracking-tight">
               {ride.kind === "offer" ? "Seat requests" : "Drivers who responded"}
             </h2>
             {responses.length === 0 ? (
@@ -213,8 +234,8 @@ export default async function RideDetailsPage({
       ) : null}
 
       {mine ? (
-        <section className="mt-6 rounded-3xl border border-line bg-white p-5">
-          <h2 className="text-xl font-bold">Your response</h2>
+        <section className="mt-6 rounded-2xl border border-line bg-white p-5 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight">Your response</h2>
           <p className="mt-2 text-muted">
             {mine.status === "pending"
               ? "Waiting for the poster to accept or decline."
@@ -239,8 +260,8 @@ export default async function RideDetailsPage({
       ) : null}
 
       {canRespond ? (
-        <section className="mt-6 rounded-3xl border border-line bg-white p-5">
-          <h2 className="text-xl font-bold">
+        <section className="mt-6 rounded-2xl border border-line bg-white p-5 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight">
             {ride.kind === "offer" ? "Request a seat" : "Offer to drive"}
           </h2>
           <p className="mt-2 text-sm text-muted">
@@ -253,6 +274,7 @@ export default async function RideDetailsPage({
             <input type="hidden" name="kind" value={ride.kind} />
             <label className={labelClass}>
               {ride.kind === "offer" ? "Seats you need" : "Passengers you can take"}
+              <span className={hintClass}>Required</span>
               <select className={fieldClass} name="seats" defaultValue={1}>
                 {Array.from({ length: ride.seats }, (_, index) => index + 1).map((count) => (
                   <option key={count} value={count}>
@@ -263,6 +285,7 @@ export default async function RideDetailsPage({
             </label>
             <label className={labelClass}>
               Message
+              <span className={hintClass}>Optional</span>
               <textarea
                 className={fieldClass}
                 name="message"
@@ -279,7 +302,7 @@ export default async function RideDetailsPage({
       ) : null}
 
       {!isOwner && !mine && !canRespond ? (
-        <p className="mt-6 rounded-2xl bg-white p-5 text-muted">
+        <p className="mt-6 rounded-2xl border border-line bg-white p-5 text-sm leading-6 text-muted shadow-sm">
           {ride.status === "cancelled"
             ? "This ride was cancelled."
             : "This ride is no longer taking new responses."}

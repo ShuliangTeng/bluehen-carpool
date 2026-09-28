@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth-forms";
+import { pageLead, pageTitle } from "@/components/styles";
 import { getViewer } from "@/lib/auth";
 import { oneParam } from "@/lib/format";
 
@@ -23,11 +24,11 @@ export default async function LoginPage({
 
   return (
     <div className="mx-auto max-w-md px-4 py-12">
-      <h1 className="text-3xl font-bold">Welcome back</h1>
-      <p className="mt-2 text-muted">
+      <h1 className={pageTitle}>Welcome back</h1>
+      <p className={pageLead}>
         Log in with the email and password you signed up with.
       </p>
-      <div className="mt-6 rounded-3xl border border-line bg-white p-6">
+      <div className="mt-6 rounded-2xl border border-line bg-white p-6 shadow-sm">
         <LoginForm confirmed={confirmed} />
       </div>
     </div>

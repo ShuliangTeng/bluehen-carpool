@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { updateRide } from "@/app/actions/rides";
 import { RideForm } from "@/components/ride-form";
+import { pageTitle, textLink } from "@/components/styles";
 import { requireViewer } from "@/lib/auth";
 import { todayInNewark } from "@/lib/format";
 import { normalizeRide } from "@/lib/rides";
@@ -38,16 +39,16 @@ export default async function EditRidePage({
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <Link href={`/rides/${id}`} className="text-sm font-semibold text-hen">
+      <Link href={`/rides/${id}`} className={textLink}>
         Back to this ride
       </Link>
-      <h1 className="mt-3 text-3xl font-bold">Edit your ride</h1>
+      <h1 className={`mt-3 ${pageTitle}`}>Edit your ride</h1>
       {ride.status !== "open" ? (
         <p className="mt-4 rounded-xl bg-paper px-4 py-3 text-muted">
           Only open rides can be edited. This one is {ride.status}.
         </p>
       ) : (
-        <div className="mt-6 rounded-3xl border border-line bg-white p-5 sm:p-6">
+        <div className="mt-6 rounded-2xl border border-line bg-white p-5 shadow-sm sm:p-6">
           <RideForm
             action={updateRide}
             submitLabel="Save changes"
