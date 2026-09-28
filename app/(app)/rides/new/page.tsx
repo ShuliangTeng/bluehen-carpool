@@ -39,6 +39,7 @@ export default async function NewRidePage({
       {selected ? (
         <div className="mt-6 rounded-2xl border border-line bg-white p-5 shadow-sm sm:p-6">
           <RideForm
+            key={selected}
             action={createRide}
             submitLabel={selected === "offer" ? "Post offer" : "Post request"}
             showKindPicker={false}
